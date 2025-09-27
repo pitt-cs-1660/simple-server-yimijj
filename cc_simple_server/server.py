@@ -40,21 +40,23 @@ async def create_task(task_data: TaskCreate):
     cursor = conn.cursor()
 
     cursor.execute(
-        """INSERT INTO tasks (title, description, completed) 
-        VALUES (?, ?, ?)""",
+        """
+        INSERT INTO tasks (title, description, completed) 
+        VALUES (?, ?, ?)
+        """,
         (task_data.title, task_data.description, task_data.completed)
     )
     conn.commit()
-    task_id = cursor.lastrowid
+    newTaskID = cursor.lastrowid
 
-    newTask = cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    newTask = cursor.execute("SELECT * FROM tasks WHERE id = ?", (newTaskID,)).fetchone()
     conn.close()
 
     return TaskRead(
-                id=newTask["id"],
-                title=newTask["title"],
-                description=newTask["description"],
-                completed=newTask["completed"]
+                id = newTask["id"],
+                title = newTask["title"],
+                description = newTask["description"],
+                completed = newTask["completed"]
             )
 
 
@@ -76,13 +78,13 @@ async def get_tasks():
     allTasks = cursor.execute("SELECT * FROM tasks").fetchall()
     conn.close()
 
-    tasks = [TaskRead(
+    tasksList = [TaskRead(
                 id = task["id"],
                 title = task["title"],
                 description = task["description"],
                 completed = task["completed"]
             ) for task in allTasks]
-    return tasks
+    return tasksList
 
 
 
@@ -117,10 +119,10 @@ async def update_task(task_id: int, task_data: TaskCreate):
     conn.close()
 
     return TaskRead(
-                id=updatedTask["id"],
-                title=updatedTask["title"],
-                description=updatedTask["description"],
-                completed=updatedTask["completed"]
+                id = updatedTask["id"],
+                title = updatedTask["title"],
+                description = updatedTask["description"],
+                completed = updatedTask["completed"]
             )
 
 
