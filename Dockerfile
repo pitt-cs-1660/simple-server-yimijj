@@ -1,5 +1,5 @@
 # Use Python 3.12 base image
-FROM python:3.12 as builder
+FROM python:3.12 AS builder
 
 # Install uv package manager
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
@@ -31,4 +31,4 @@ RUN useradd -r app
 EXPOSE 8000
 
 # Set CMD to run FastAPI server on 0.0.0.0:8000
-CMD ["uvicorn", "cc_simple_server.server:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/.venv/bin/uvicorn", "cc_simple_server.server:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
