@@ -36,28 +36,46 @@ async def create_task(task_data: TaskCreate):
     Returns:
         TaskRead: The created task data
     """
+    # conn = get_db_connection()
+    # cursor = conn.cursor()
+
+    # cursor.execute(
+    #     """
+    #     INSERT INTO tasks (title, description, completed) 
+    #     VALUES (?, ?, ?)
+    #     """,
+    #     (task_data.title, task_data.description, task_data.completed)
+    # )
+    # conn.commit()
+    # newTaskID = cursor.lastrowid
+
+    # newTask = cursor.execute("SELECT * FROM tasks WHERE id = ?", (newTaskID,)).fetchone()
+    # conn.close()
+
+    # return TaskRead(
+    #             id = newTask["id"],
+    #             title = newTask["title"],
+    #             description = newTask["description"],
+    #             completed = newTask["completed"]
+    #         )
     conn = get_db_connection()
     cursor = conn.cursor()
-
     cursor.execute(
-        """
-        INSERT INTO tasks (title, description, completed) 
-        VALUES (?, ?, ?)
-        """,
-        (task_data.title, task_data.description, task_data.completed)
+        "INSERT INTO tasks (title, description, completed) VALUES (?, ?, ?)",
+        (task_data.title, task_data.description, task_data.completed),
     )
     conn.commit()
-    newTaskID = cursor.lastrowid
 
-    newTask = cursor.execute("SELECT * FROM tasks WHERE id = ?", (newTaskID,)).fetchone()
+    # get the id of the newly created task
+    task_id = cursor.lastrowid
+
+    # fetch the created task to return it
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    row = cursor.fetchone()
     conn.close()
 
-    return TaskRead(
-                id = newTask["id"],
-                title = newTask["title"],
-                description = newTask["description"],
-                completed = newTask["completed"]
-            )
+    # convert database row to taskread object
+    return TaskRead(**dict(row))
 
 
 # GET ROUTE to get all tasks
@@ -72,19 +90,27 @@ async def get_tasks():
     Returns:
         list[TaskRead]: A list of all tasks in the database
     """
+    # conn = get_db_connection()
+    # cursor = conn.cursor()
+
+    # allTasks = cursor.execute("SELECT * FROM tasks").fetchall()
+    # conn.close()
+
+    # tasksList = [TaskRead(
+    #             id = task["id"],
+    #             title = task["title"],
+    #             description = task["description"],
+    #             completed = task["completed"]
+    #         ) for task in allTasks]
+    # return tasksList
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    allTasks = cursor.execute("SELECT * FROM tasks").fetchall()
+    cursor.execute("SELECT * FROM tasks")
+    rows = cursor.fetchall()
     conn.close()
 
-    tasksList = [TaskRead(
-                id = task["id"],
-                title = task["title"],
-                description = task["description"],
-                completed = task["completed"]
-            ) for task in allTasks]
-    return tasksList
+    # convert database rows to taskread objects
+    return [TaskRead(**dict(row)) for row in rows]
 
 
 
@@ -102,28 +128,52 @@ async def update_task(task_id: int, task_data: TaskCreate):
         TaskRead: The updated task data
     """
 
+    # conn = get_db_connection()
+    # cursor = conn.cursor()
+
+    # cursor.execute(
+    #     """
+    #     UPDATE tasks
+    #     SET title = ?, description = ?, completed = ?
+    #     WHERE id = ?
+    #     """,
+    #     (task_data.title, task_data.description, task_data.completed, task_id)
+    # )
+    # conn.commit()
+
+    # updatedTask = cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    # conn.close()
+
+    # return TaskRead(
+    #             id = updatedTask["id"],
+    #             title = updatedTask["title"],
+    #             description = updatedTask["description"],
+    #             completed = updatedTask["completed"]
+    #         )
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # first, check if the task exists
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    existing_task = cursor.fetchone()
+    if not existing_task:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # update the task
     cursor.execute(
-        """
-        UPDATE tasks
-        SET title = ?, description = ?, completed = ?
-        WHERE id = ?
-        """,
-        (task_data.title, task_data.description, task_data.completed, task_id)
+        "UPDATE tasks SET title = ?, description = ?, completed = ? WHERE id = ?",
+        (task_data.title, task_data.description, task_data.completed, task_id),
     )
     conn.commit()
 
-    updatedTask = cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    # fetch the updated task
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    updated_row = cursor.fetchone()
     conn.close()
 
-    return TaskRead(
-                id = updatedTask["id"],
-                title = updatedTask["title"],
-                description = updatedTask["description"],
-                completed = updatedTask["completed"]
-            )
+    # return the updated task
+    return TaskRead(**dict(updated_row))
 
 
 
@@ -139,13 +189,30 @@ async def delete_task(task_id: int):
     Returns:
         dict: A message indicating that the task was deleted successfully
     """
+    # conn = get_db_connection()
+    # cursor = conn.cursor()
+
+    # cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    # conn.commit()
+
+    # conn.close()
+
+    # return {"message": f"Task {task_id} deleted successfully"}
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,)).fetchone()
-    conn.commit()
+    # first, check if the task exists
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    existing_task = cursor.fetchone()
+    if not existing_task:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
 
+    # delete the task
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
     conn.close()
 
+    # return success message
     return {"message": f"Task {task_id} deleted successfully"}
 
