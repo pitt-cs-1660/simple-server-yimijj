@@ -1,9 +1,8 @@
-# Build stage
 # Use Python 3.12 base image
 FROM python:3.12 as builder
 
 # Install uv package manager
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Set working directory
 WORKDIR /app
@@ -15,24 +14,18 @@ COPY pyproject.toml ./
 RUN uv sync --no-install-project --no-editable
 
 
-# Final stage
-# Use Python 3.12-slim base image (smaller footprint)
-FROM python:3.12-slim as final
 
-# Copy the virtual environment from build stage
+# Use Python 3.12-slim base image (smaller footprint)
+FROM python:3.12-slim
+
+# Copy the virtual environment from the build stage
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
 # Copy application source code
 COPY . /cc_simple_server ./
 
-# Environment setup (use venv and sane defaults)
-ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/app/.venv/bin:${PATH}" \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-# Create non-root user for security
-RUN useradd -m app
+# Change to the non-root user for security
+RUN useradd -r app
 
 # Expose port 8000
 EXPOSE 8000
