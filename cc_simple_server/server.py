@@ -56,7 +56,6 @@ async def create_task(task_data: TaskCreate):
                 description=newTask["description"],
                 completed=newTask["completed"]
             )
-    # raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
 
 
 # GET ROUTE to get all tasks
@@ -85,7 +84,6 @@ async def get_tasks():
             ) for task in allTasks]
     return tasks
 
-    # raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
 
 
 # UPDATE ROUTE data is sent in the body of the request and the task_id is in the URL
@@ -125,7 +123,6 @@ async def update_task(task_id: int, task_data: TaskCreate):
                 completed=updatedTask["completed"]
             )
 
-    # raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
 
 
 # DELETE ROUTE task_id is in the URL
@@ -150,4 +147,3 @@ async def delete_task(task_id: int):
 
     return {"message": f"Task {task_id} deleted successfully"}
 
-    # raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
