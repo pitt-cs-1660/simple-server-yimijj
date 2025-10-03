@@ -52,6 +52,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 COPY pyproject.toml ./
+COPY tests ./tests
 
 RUN uv sync --no-install-project --no-editable
 
@@ -59,16 +60,17 @@ RUN uv sync --no-install-project --no-editable
 # Final stage
 FROM python:3.12-slim as final
 
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/tests ./tests
-
-COPY . /cc_simple_server ./
 
 ENV VIRTUAL_ENV=/app/.venv
 
 ENV PATH="/app/.venv/bin:${PATH}"
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/tests ./tests
+
+COPY . /cc_simple_server ./
 
 EXPOSE 8000
 
