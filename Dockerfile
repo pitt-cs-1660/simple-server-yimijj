@@ -20,20 +20,15 @@ RUN uv sync --no-install-project --no-editable
 FROM python:3.12-slim
 
 # Copy the virtual environment from build stage
-# WORKDIR /app
-# ENV PATH="/app/.venv/bin:${PATH}" 
-# ENV PYTHONPATH="/app:${PYTHONPATH}" 
-# ENV VIRTUAL_ENV=/app/.venv
-# ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /app
+ENV PATH="/app/.venv/bin:${PATH}" 
+ENV PYTHONPATH="/app:${PYTHONPATH}" 
+ENV VIRTUAL_ENV=/app/.venv
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
 # Copy application source code
 COPY --chown=app:app . .
-
-# Create non-root user for security
-# RUN useradd -r app
-# RUN chown -R app:app /app && chmod -R u+rw /app
-# USER app
 
 # Expose port 8000
 EXPOSE 8000
