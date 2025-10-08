@@ -31,9 +31,9 @@ COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --chown=app:app . .
 
 # Create non-root user for security
-RUN useradd -r app
-RUN chown -R app:app /app && chmod -R u+rw /app
-USER app
+# RUN useradd -r app
+# RUN chown -R app:app /app && chmod -R u+rw /app
+# USER app
 
 # Expose port 8000
 EXPOSE 8000
